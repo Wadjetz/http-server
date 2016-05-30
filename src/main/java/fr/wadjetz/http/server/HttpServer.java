@@ -11,28 +11,39 @@ public class HttpServer {
         ServerSocket serverSocket = new ServerSocket(port);
 
         while (true) {
-            Socket socket = serverSocket.accept();
-            PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            final Socket socket = serverSocket.accept();
 
-            HttpRequest httpRequest = null;
-            try {
-                httpRequest = parseRequest(bufferedReader);
-                HttpResponse httpResponse = handler.apply(httpRequest, new HttpResponse());
+            new Thread(() -> {
+                PrintWriter printWriter = null;
+                BufferedReader bufferedReader = null;
+                HttpRequest httpRequest = null;
+                try {
+                    printWriter = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
+                    bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-                String response = buildResponse(httpRequest, httpResponse.withHeader("Content-Length", httpResponse.getBody().length() + ""));
-                printWriter.print(response);
+                    try {
+                        httpRequest = parseRequest(bufferedReader);
+                        HttpResponse httpResponse = handler.apply(httpRequest, new HttpResponse());
 
-            } catch (HttpException e) {
-                e.printStackTrace();
-                String response = buildResponse(httpRequest,  new HttpResponse().withStatus(e.getErrorCode()).withStatusText(e.getMessage()));
-                printWriter.print(response);
-            }
+                        String response = buildResponse(httpRequest, httpResponse.withHeader("Content-Length", httpResponse.getBody().length() + ""));
+                        printWriter.print(response);
 
-            printWriter.flush();
-            printWriter.close();
-            bufferedReader.close();
-            socket.close();
+                    } catch (HttpException e) {
+                        e.printStackTrace();
+                        String response = buildResponse(httpRequest,  new HttpResponse().withStatus(e.getErrorCode()).withStatusText(e.getMessage()));
+                        printWriter.print(response);
+                    }
+
+                    printWriter.flush();
+
+                    bufferedReader.close();
+                    socket.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } finally {
+                    if (printWriter != null) printWriter.close();
+                }
+            }).start();
 
             if (false) break;
         }
