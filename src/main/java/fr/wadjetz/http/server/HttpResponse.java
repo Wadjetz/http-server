@@ -7,8 +7,8 @@ import java.util.Map;
 import java.util.Optional;
 
 public class HttpResponse {
-    private String status;
-    private String statusText;
+    private String status = "200";
+    private String statusText = "Ok";
     private Optional<String> body = Optional.empty();
     private Optional<File> file = Optional.empty();
     private Map<String, String> headers;
