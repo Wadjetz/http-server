@@ -9,29 +9,34 @@ import java.util.Map;
 public class HttpServer {
     public static void run(int port, HttpHandler handler) throws IOException {
         ServerSocket serverSocket = new ServerSocket(port);
-        Socket socket = serverSocket.accept();
 
-        PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        while (true) {
+            Socket socket = serverSocket.accept();
+            PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-        HttpRequest httpRequest = null;
-        try {
-            httpRequest = parseRequest(bufferedReader);
-            HttpResponse httpResponse = handler.apply(httpRequest, new HttpResponse());
+            HttpRequest httpRequest = null;
+            try {
+                httpRequest = parseRequest(bufferedReader);
+                HttpResponse httpResponse = handler.apply(httpRequest, new HttpResponse());
 
-            String response = buildResponse(httpRequest, httpResponse.withHeader("Content-Length", httpResponse.getBody().length() + ""));
-            printWriter.print(response);
+                String response = buildResponse(httpRequest, httpResponse.withHeader("Content-Length", httpResponse.getBody().length() + ""));
+                printWriter.print(response);
 
-        } catch (HttpException e) {
-            e.printStackTrace();
-            String response = buildResponse(httpRequest,  new HttpResponse().withStatus(e.getErrorCode()).withStatusText(e.getMessage()));
-            printWriter.print(response);
+            } catch (HttpException e) {
+                e.printStackTrace();
+                String response = buildResponse(httpRequest,  new HttpResponse().withStatus(e.getErrorCode()).withStatusText(e.getMessage()));
+                printWriter.print(response);
+            }
+
+            printWriter.flush();
+            printWriter.close();
+            bufferedReader.close();
+            socket.close();
+
+            if (false) break;
         }
 
-        printWriter.flush();
-        printWriter.close();
-        bufferedReader.close();
-        socket.close();
         serverSocket.close();
     }
 
