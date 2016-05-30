@@ -1,5 +1,7 @@
 package fr.wadjetz.http.server;
 
+import org.apache.commons.io.IOUtils;
+
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -25,13 +27,23 @@ public class HttpServer {
                         httpRequest = parseRequest(bufferedReader);
                         HttpResponse httpResponse = handler.apply(httpRequest, new HttpResponse());
 
-                        String response = buildResponse(httpRequest, httpResponse.withHeader("Content-Length", httpResponse.getBody().length() + ""));
-                        printWriter.print(response);
+                        if (httpResponse.getBody().isPresent()) {
+                            String responseHeader = buildResponseHeader(httpRequest, httpResponse.withHeader("Content-Length", httpResponse.getBody().get().length() + ""));
+                            printWriter.print(responseHeader);
+                            printWriter.print(httpResponse.getBody().get() + "\r\n");
+                        } else if (httpResponse.getFile().isPresent()) {
+                            String responseHeader = buildResponseHeader(httpRequest, httpResponse);
+                            printWriter.print(responseHeader);
+                            IOUtils.copyLarge(new FileReader(httpResponse.getFile().get()),printWriter);
+                        } else {
+                            String responseHeader = buildResponseHeader(httpRequest, httpResponse);
+                            printWriter.print(responseHeader);
+                        }
 
                     } catch (HttpException e) {
                         e.printStackTrace();
-                        String response = buildResponse(httpRequest,  new HttpResponse().withStatus(e.getErrorCode()).withStatusText(e.getMessage()));
-                        printWriter.print(response);
+                        String responseHeader = buildResponseHeader(httpRequest,  new HttpResponse().withStatus(e.getErrorCode()).withStatusText(e.getMessage()));
+                        printWriter.print(responseHeader);
                     }
 
                     printWriter.flush();
@@ -51,13 +63,13 @@ public class HttpServer {
         serverSocket.close();
     }
 
-    public static String buildResponse(HttpRequest httpRequest, HttpResponse httpResponse) {
+    public static String buildResponseHeader(HttpRequest httpRequest, HttpResponse httpResponse) {
         String protocolLine = httpRequest.getVersion() + " " + httpResponse.getStatus() + " " + httpResponse.getStatusText();
         String responseHeaders = "";
         for (Map.Entry<String, String> entry : httpResponse.getHeaders().entrySet()) {
-            responseHeaders += entry.getKey() + ": " + entry.getValue() + "\n";
+            responseHeaders += entry.getKey() + ": " + entry.getValue() + "\r\n";
         }
-        return protocolLine + "\n" + responseHeaders + "\n" + httpResponse.getBody();
+        return protocolLine + "\r\n" + responseHeaders + "\r\n";
     }
 
     public static HttpRequest parseRequest(BufferedReader bufferedReader) throws IOException, HttpException {

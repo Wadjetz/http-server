@@ -1,13 +1,16 @@
 package fr.wadjetz.http.server;
 
+import java.io.File;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class HttpResponse {
     private String status;
     private String statusText;
-    private String body;
+    private Optional<String> body = Optional.empty();
+    private Optional<File> file = Optional.empty();
     private Map<String, String> headers;
 
     public HttpResponse() {
@@ -22,8 +25,10 @@ public class HttpResponse {
         switch (status) {
             case 200:
                 this.statusText = "OK";
+                break;
             case 404:
                 this.statusText = "Not Found";
+                break;
         }
         this.status = status + "";
         return this;
@@ -40,7 +45,7 @@ public class HttpResponse {
     }
 
     public HttpResponse withBody(String body) {
-        this.body = body;
+        this.body = Optional.ofNullable(body);
         return this;
     }
 
@@ -52,10 +57,6 @@ public class HttpResponse {
         return statusText;
     }
 
-    public String getBody() {
-        return body;
-    }
-
     public Map<String, String> getHeaders() {
         return headers;
     }
@@ -63,5 +64,18 @@ public class HttpResponse {
     public HttpResponse setStatus(String status) {
         this.status = status;
         return this;
+    }
+
+    public HttpResponse withFile(File file) {
+        this.file = Optional.ofNullable(file);
+        return this;
+    }
+
+    public Optional<String> getBody() {
+        return body;
+    }
+
+    public Optional<File> getFile() {
+        return file;
     }
 }
