@@ -10,10 +10,7 @@ public class HttpResponse {
     private String body;
     private Map<String, String> headers;
 
-    public HttpResponse(String status, String statusText, String body) {
-        this.status = status;
-        this.statusText = statusText;
-        this.body = body;
+    public HttpResponse() {
         this.headers = new HashMap<>();
         headers.put("Date", new Date().toString());
         headers.put("Server", "My Http Server");
@@ -21,39 +18,41 @@ public class HttpResponse {
         headers.put("Connection", "Closed");
     }
 
-    public void setCookie(String name, String value) {
+    public HttpResponse withStatus(HttpStatus status) {
+        switch (status) {
+            case Ok:
+                this.status = "200";
+                this.statusText = "OK";
+            case NotFound:
+                this.status = "400";
+                this.statusText = "Not Found";
+        }
+        return this;
+    }
 
+    public HttpResponse withHeader(String key, String value) {
+        headers.put(key, value);
+        return this;
+    }
+
+    public HttpResponse withBody(String body) {
+        this.body = body;
+        return this;
     }
 
     public String getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
     public String getStatusText() {
         return statusText;
-    }
-
-    public void setStatusText(String statusText) {
-        this.statusText = statusText;
     }
 
     public String getBody() {
         return body;
     }
 
-    public void setBody(String body) {
-        this.body = body;
-    }
-
     public Map<String, String> getHeaders() {
         return headers;
-    }
-
-    public void setHeaders(Map<String, String> headers) {
-        this.headers = headers;
     }
 }

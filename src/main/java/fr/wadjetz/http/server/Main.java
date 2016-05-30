@@ -8,65 +8,13 @@ import java.util.Map;
 
 class Main {
     public static void main(String[] args) {
+        System.out.println("Start Server localhost:8888");
         try {
-            System.out.println("Start Server localhost:8888");
-            ServerSocket serverSocket = new ServerSocket(8888);
-            Socket socket = serverSocket.accept();
-            PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            HttpRequest httpRequest = parseRequest(bufferedReader);
-            HttpResponse httpResponse = new HttpResponse("200", "OK", "Body");
-            HashMap<String, String> responseHeaders = new HashMap<>();
-            responseHeaders.put("Content-Length", httpResponse.getBody().length() + "");
-            httpResponse.setHeaders(responseHeaders);
-            String response = writeResponse(printWriter, httpRequest, httpResponse);
-            printWriter.print(response);
-            printWriter.flush();
-            printWriter.close();
-            bufferedReader.close();
-            socket.close();
-            serverSocket.close();
+            HttpServer.run(8888, ((request, response) -> response.withStatus(HttpStatus.Ok).withBody("Hello World")));
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public static String writeResponse(PrintWriter printWriter, HttpRequest httpRequest, HttpResponse httpResponse) {
-        String protocolLine = httpRequest.getVersion() + " " + httpResponse.getStatus() + " " + httpResponse.getStatusText();
-        String responseHeaders = "";
-        for (Map.Entry<String, String> entry : httpResponse.getHeaders().entrySet()) {
-            responseHeaders += entry.getKey() + ": " + entry.getValue() + "\n";
-        }
-        return protocolLine + "\n" + responseHeaders + "\n" + httpResponse.getBody();
-    }
 
-    public static HttpRequest parseRequest(BufferedReader bufferedReader) throws IOException {
-        String inputLine;
-        int lineCounter = 0;
-        HttpRequest httpRequest = new HttpRequest();
-        HashMap<String, String> headers = new HashMap<>();
-        while (true) {
-            inputLine = bufferedReader.readLine();
-            if (inputLine.trim().isEmpty() || inputLine == null) {
-                break;
-            }
-            //System.out.println("HttpRequest Parse Line=" + inputLine);
-            if (lineCounter == 0) {
-                String[] splites = inputLine.split(" ");
-                httpRequest.setMethod(splites[0].trim().toUpperCase());
-                httpRequest.setAbsolutePath(splites[1].trim());
-                httpRequest.setVersion(splites[2].trim());
-            } else {
-                int index = inputLine.indexOf(":");
-                if (index != -1) {
-                    String key = inputLine.substring(0, index);
-                    String value = inputLine.substring(index+1);
-                    headers.put(key.trim().toLowerCase(), value.trim());
-                }
-            }
-            lineCounter++;
-        }
-        httpRequest.setHeaders(headers);
-        return httpRequest;
-    }
 }
