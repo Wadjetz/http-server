@@ -18,15 +18,19 @@ public class HttpResponse {
         headers.put("Connection", "Closed");
     }
 
-    public HttpResponse withStatus(HttpStatus status) {
+    public HttpResponse withStatus(int status) {
         switch (status) {
-            case Ok:
-                this.status = "200";
+            case 200:
                 this.statusText = "OK";
-            case NotFound:
-                this.status = "400";
+            case 404:
                 this.statusText = "Not Found";
         }
+        this.status = status + "";
+        return this;
+    }
+
+    public HttpResponse withStatusText(String statusText) {
+        this.statusText = statusText;
         return this;
     }
 
@@ -54,5 +58,10 @@ public class HttpResponse {
 
     public Map<String, String> getHeaders() {
         return headers;
+    }
+
+    public HttpResponse setStatus(String status) {
+        this.status = status;
+        return this;
     }
 }

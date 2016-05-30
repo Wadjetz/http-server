@@ -1,5 +1,6 @@
 package fr.wadjetz.http.server;
 
+import java.util.Arrays;
 import java.util.Map;
 
 public class HttpRequest {
@@ -8,6 +9,7 @@ public class HttpRequest {
     private String absolutePath;
     private String version;
     private Map<String, String> headers;
+    private byte[] body;
 
     public Object getParametre(String name) {
         return null;
@@ -65,6 +67,14 @@ public class HttpRequest {
         this.headers = headers;
     }
 
+    public byte[] getBody() {
+        return body;
+    }
+
+    public void setBody(byte[] body) {
+        this.body = body;
+    }
+
     @Override
     public String toString() {
         return "HttpRequest{" +
@@ -72,7 +82,8 @@ public class HttpRequest {
                 ", relativePath='" + relativePath + '\'' +
                 ", absolutePath='" + absolutePath + '\'' +
                 ", version='" + version + '\'' +
-                ", headers=" + headers +
+                //", headers=" + headers +
+                ", body=" + Arrays.toString(body) +
                 '}';
     }
 }

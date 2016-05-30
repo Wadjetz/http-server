@@ -14,13 +14,20 @@ public class HttpServer {
         PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-        HttpRequest httpRequest = parseRequest(bufferedReader);
+        HttpRequest httpRequest = null;
+        try {
+            httpRequest = parseRequest(bufferedReader);
+            HttpResponse httpResponse = handler.apply(httpRequest, new HttpResponse());
 
-        HttpResponse httpResponse = handler.apply(httpRequest, new HttpResponse());
+            String response = buildResponse(httpRequest, httpResponse.withHeader("Content-Length", httpResponse.getBody().length() + ""));
+            printWriter.print(response);
 
-        String response = buildResponse(httpRequest, httpResponse.withHeader("Content-Length", httpResponse.getBody().length() + ""));
+        } catch (HttpException e) {
+            e.printStackTrace();
+            String response = buildResponse(httpRequest,  new HttpResponse().withStatus(e.getErrorCode()).withStatusText(e.getMessage()));
+            printWriter.print(response);
+        }
 
-        printWriter.print(response);
         printWriter.flush();
         printWriter.close();
         bufferedReader.close();
@@ -37,14 +44,16 @@ public class HttpServer {
         return protocolLine + "\n" + responseHeaders + "\n" + httpResponse.getBody();
     }
 
-    public static HttpRequest parseRequest(BufferedReader bufferedReader) throws IOException {
+    public static HttpRequest parseRequest(BufferedReader bufferedReader) throws IOException, HttpException {
         String inputLine;
         int lineCounter = 0;
+        byte[] body = null;
         HttpRequest httpRequest = new HttpRequest();
         HashMap<String, String> headers = new HashMap<>();
         while (true) {
             inputLine = bufferedReader.readLine();
-            if (inputLine.trim().isEmpty() || inputLine == null) {
+            System.out.println(inputLine);
+            if (inputLine.trim().isEmpty()) {
                 break;
             }
             if (lineCounter == 0) {
@@ -62,6 +71,23 @@ public class HttpServer {
             }
             lineCounter++;
         }
+
+        String contentLength = headers.get("Content-Length".toLowerCase());
+
+        if (contentLength != null) {
+            int length = Integer.parseInt(contentLength);
+            if(length < 0)
+                throw new HttpException(400, "Malformed content-length header:" + headers.get("content-length"));
+
+            body = new byte[length];
+            int i = 0;
+
+            while(i < length) {
+                body[i++] = (byte)bufferedReader.read();
+            }
+        }
+
+        httpRequest.setBody(body);
         httpRequest.setHeaders(headers);
         return httpRequest;
     }
