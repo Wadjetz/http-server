@@ -11,34 +11,6 @@ public class HttpRequest {
     private Map<String, String> headers;
     private byte[] body;
 
-    public Object getParametre(String name) {
-        return null;
-    }
-
-    public String[] getParametersNames() {
-        return new String[0];
-    }
-
-    public String getMethod() {
-        return null;
-    }
-
-    public Object getCookies(String name) {
-        return null;
-    }
-
-    public String[] getCookiesNames() {
-        return new String[0];
-    }
-
-    public String getRelativePath() {
-        return null;
-    }
-
-    public String getAbsolutePath() {
-        return null;
-    }
-
     public void setMethod(String method) {
         this.method = method;
     }
@@ -73,6 +45,18 @@ public class HttpRequest {
 
     public void setBody(byte[] body) {
         this.body = body;
+    }
+
+    public String getRelativePath() {
+        return relativePath;
+    }
+
+    public String getAbsolutePath() {
+        return absolutePath;
+    }
+
+    public String getMethod() {
+        return method;
     }
 
     @Override

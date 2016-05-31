@@ -7,9 +7,10 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class HttpServer {
-    public static void run(int port, HttpHandler handler) throws IOException {
+    public static void run(final int port, final HttpStaticFileHandler httpStaticFileHandler, final HttpHandler handler) throws IOException {
         ServerSocket serverSocket = new ServerSocket(port);
 
         while (true) {
@@ -25,7 +26,16 @@ public class HttpServer {
 
                     try {
                         httpRequest = parseRequest(bufferedReader);
-                        HttpResponse httpResponse = handler.apply(httpRequest, new HttpResponse());
+                        HttpResponse httpResponse = null;
+                        Optional<HttpResponse> staticFileHandler = httpStaticFileHandler.apply(httpRequest, new HttpResponse());
+
+                        if (staticFileHandler.isPresent()) {
+                            System.out.println("staticFileHandler");
+                            httpResponse = staticFileHandler.get();
+                        } else {
+                            System.out.println("handler");
+                            httpResponse = handler.apply(httpRequest, new HttpResponse());
+                        }
 
                         if (httpResponse.getBody().isPresent()) {
                             String responseHeader = buildResponseHeader(httpRequest, httpResponse.withHeader("Content-Length", httpResponse.getBody().get().length() + ""));

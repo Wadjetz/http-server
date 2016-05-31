@@ -17,8 +17,13 @@ public class HttpResponse {
         this.headers = new HashMap<>();
         headers.put("Date", new Date().toString());
         headers.put("Server", "My Http Server");
-        headers.put("Content-Type", "text/html");
         headers.put("Connection", "Closed");
+    }
+
+    public HttpResponse text(String text) {
+        headers.put("Content-Type", "text/plain");
+        body = Optional.ofNullable(text);
+        return this;
     }
 
     public HttpResponse withStatus(int status) {
