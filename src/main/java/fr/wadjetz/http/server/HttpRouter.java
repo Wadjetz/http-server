@@ -7,28 +7,16 @@ public class HttpRouter {
 
     private List<Route> routesList = new ArrayList<>();
 
-    public HttpRouter addRoute(String path, HttpHandler httpHandler) {
-        routes.put(path, httpHandler);
-        return this;
-    }
-
-    public HttpRouter _addRoute(Route route) {
+    public HttpRouter addRoute(Route route) {
         routesList.add(route);
         return this;
     }
 
-    public Optional<HttpHandler> _resolve(HttpRequest httpRequest) {
+    public Optional<HttpHandler> resolve(HttpRequest httpRequest) {
         return routesList.stream().filter(route -> {
             String path = httpRequest.getAbsolutePath();
-
-            return false;
+            return route.getPattern().matcher(path).find();
         }).map(Route::getHttpHandler).findFirst();
-    }
-
-    public Optional<HttpHandler> resolve(HttpRequest request) {
-        String path = request.getAbsolutePath();
-        HttpHandler httpHandler = routes.get(path);
-        return Optional.ofNullable(httpHandler);
     }
 
     @Override

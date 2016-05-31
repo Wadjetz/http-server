@@ -2,6 +2,7 @@ package fr.wadjetz.http.server;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.regex.Pattern;
 
 class Main {
     public static void main(String[] args) {
@@ -10,17 +11,20 @@ class Main {
         int port = 8888;
 
         HttpRouter router = new HttpRouter();
+        /*
         router.addRoute("/", (request, response) -> {
             System.out.println(request);
             //return response.withFile(new File("/tmp/test.txt"));
             //return response.withStatus(200).withBody(new String(request.getBody()));
             return response.text("Hello");
         });
+        */
         //router.addRoute("/test", (request, response) -> response.text(new String(request.getBody())));
 
         //router.addRoute("/assets", new HttpStaticFileHandler("/tmp"));
 
-        HttpRouter httpRouterFiles = new HttpRouter().addRoute("/", new HttpStaticFileHandler("/tmp"));
+        //HttpRouter httpRouterFiles = new HttpRouter().addRoute("/", new HttpStaticFileHandler("/tmp"));
+        HttpRouter httpRouterFiles = new HttpRouter().addRoute(new Route("GET", Pattern.compile("\\/.*"), new HttpStaticFileHandler("/tmp")));
 
         HttpVHost httpVHost = new HttpVHost()
                 .addVHost("site1.fr:" + port, router)

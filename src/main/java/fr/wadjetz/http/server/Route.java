@@ -2,14 +2,16 @@ package fr.wadjetz.http.server;
 
 import scala.util.matching.Regex;
 
+import java.util.regex.Pattern;
+
 public class Route {
     private String method;
-    private Regex regex;
+    private Pattern pattern;
     private HttpHandler httpHandler;
 
-    public Route(String method, Regex regex, HttpHandler httpHandler) {
+    public Route(String method, Pattern pattern, HttpHandler httpHandler) {
         this.method = method;
-        this.regex = regex;
+        this.pattern = pattern;
         this.httpHandler = httpHandler;
     }
 
@@ -21,19 +23,19 @@ public class Route {
         this.method = method;
     }
 
-    public Regex getRegex() {
-        return regex;
-    }
-
-    public void setRegex(Regex regex) {
-        this.regex = regex;
-    }
-
     public HttpHandler getHttpHandler() {
         return httpHandler;
     }
 
     public void setHttpHandler(HttpHandler httpHandler) {
         this.httpHandler = httpHandler;
+    }
+
+    public Pattern getPattern() {
+        return pattern;
+    }
+
+    public void setPattern(Pattern pattern) {
+        this.pattern = pattern;
     }
 }
