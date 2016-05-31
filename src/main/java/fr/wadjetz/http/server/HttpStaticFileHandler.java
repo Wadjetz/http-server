@@ -1,23 +1,44 @@
 package fr.wadjetz.http.server;
 
-import java.nio.file.Path;
-import java.util.Optional;
+import java.io.File;
 
-public class HttpStaticFileHandler {
+public class HttpStaticFileHandler implements HttpHandler {
 
-    private Path rootPath;
+    private String rootPath;
 
-    public HttpStaticFileHandler(Path rootPath) {
+    public HttpStaticFileHandler(String rootPath) {
         this.rootPath = rootPath;
     }
 
-    public Optional<HttpResponse> apply(HttpRequest request, HttpResponse response) {
+    @Override
+    public HttpResponse apply(HttpRequest request, HttpResponse response) {
         String path = request.getAbsolutePath();
 
-        Path file = rootPath.resolve(path);
+        File file = new File(path);
 
-        System.out.println(file.toFile().isDirectory());
 
-        return Optional.empty();
+        if (file.isDirectory()) {
+            file.listFiles();
+        }
+
+        System.out.println(file.isDirectory());
+
+        return null;
+    }
+
+    private HttpResponse buildDirectory(HttpRequest request, HttpResponse response, File directory) {
+
+        String html = "<!doctype html>" +
+                "<html>" +
+                    "<head>" +
+                        "<title>" +
+                            "Files" +
+                        "</title>" +
+                    "</head>" +
+                    "<body>" +
+                    "</body>" +
+                "</html>";
+
+        return response.html(html);
     }
 }

@@ -3,6 +3,7 @@ package fr.wadjetz.http.server;
 import org.apache.commons.io.IOUtils;
 
 import java.io.*;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
@@ -10,31 +11,40 @@ import java.util.Map;
 import java.util.Optional;
 
 public class HttpServer {
-    public static void run(final int port, final HttpStaticFileHandler httpStaticFileHandler, final HttpHandler handler) throws IOException {
-        ServerSocket serverSocket = new ServerSocket(port);
+
+    @FunctionalInterface
+    interface Resolver {
+        Optional<HttpHandler> apply(HttpRequest request);
+    }
+
+    public static void run(final InetSocketAddress address, HttpRouter router) throws IOException {
+        ServerSocket serverSocket = new ServerSocket();
+        serverSocket.bind(address);
 
         while (true) {
             final Socket socket = serverSocket.accept();
 
             new Thread(() -> {
+
                 PrintWriter printWriter = null;
                 BufferedReader bufferedReader = null;
                 HttpRequest httpRequest = null;
+                HttpResponse httpResponse = null;
+
                 try {
                     printWriter = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
                     bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
                     try {
                         httpRequest = parseRequest(bufferedReader);
-                        HttpResponse httpResponse = null;
-                        Optional<HttpResponse> staticFileHandler = httpStaticFileHandler.apply(httpRequest, new HttpResponse());
+                        Optional<HttpHandler> httpHandlerOptional = router.resolve(httpRequest);
 
-                        if (staticFileHandler.isPresent()) {
-                            System.out.println("staticFileHandler");
-                            httpResponse = staticFileHandler.get();
+                        if (httpHandlerOptional.isPresent()) {
+                            httpResponse = httpHandlerOptional.get().apply(httpRequest, new HttpResponse());
+
+                            System.out.println(httpResponse);
                         } else {
-                            System.out.println("handler");
-                            httpResponse = handler.apply(httpRequest, new HttpResponse());
+                            httpResponse = new HttpResponse().withStatus(404);
                         }
 
                         if (httpResponse.getBody().isPresent()) {
@@ -57,7 +67,6 @@ public class HttpServer {
                     }
 
                     printWriter.flush();
-
                     bufferedReader.close();
                     socket.close();
                 } catch (IOException e) {
@@ -73,7 +82,7 @@ public class HttpServer {
         serverSocket.close();
     }
 
-    public static String buildResponseHeader(HttpRequest httpRequest, HttpResponse httpResponse) {
+    private static String buildResponseHeader(HttpRequest httpRequest, HttpResponse httpResponse) {
         String protocolLine = httpRequest.getVersion() + " " + httpResponse.getStatus() + " " + httpResponse.getStatusText();
         String responseHeaders = "";
         for (Map.Entry<String, String> entry : httpResponse.getHeaders().entrySet()) {
@@ -82,36 +91,20 @@ public class HttpServer {
         return protocolLine + "\r\n" + responseHeaders + "\r\n";
     }
 
-    public static HttpRequest parseRequest(BufferedReader bufferedReader) throws IOException, HttpException {
-        String inputLine;
-        int lineCounter = 0;
-        byte[] body = null;
-        HttpRequest httpRequest = new HttpRequest();
-        HashMap<String, String> headers = new HashMap<>();
-        while (true) {
-            inputLine = bufferedReader.readLine();
-            System.out.println(inputLine);
-            if (inputLine.trim().isEmpty()) {
-                break;
-            }
-            if (lineCounter == 0) {
-                String[] splites = inputLine.split(" ");
-                httpRequest.setMethod(splites[0].trim().toUpperCase());
-                httpRequest.setAbsolutePath(splites[1].trim());
-                httpRequest.setVersion(splites[2].trim());
-            } else {
-                int index = inputLine.indexOf(":");
-                if (index != -1) {
-                    String key = inputLine.substring(0, index);
-                    String value = inputLine.substring(index+1);
-                    headers.put(key.trim().toLowerCase(), value.trim());
-                }
-            }
-            lineCounter++;
-        }
+    private static HttpRequest parseRequest(BufferedReader bufferedReader) throws IOException, HttpException {
+        // Parse first line
+        String firstLine = bufferedReader.readLine();
+        HttpRequest httpRequest = parseProtocolLine(firstLine);
+        Map<String, String> headers = parseHeaders(bufferedReader);
+        byte[] body = parseBody(headers, bufferedReader);
+        httpRequest.setBody(body);
+        httpRequest.setHeaders(headers);
+        return httpRequest;
+    }
 
+    private static byte[] parseBody(Map<String, String> headers, BufferedReader bufferedReader) throws IOException, HttpException {
         String contentLength = headers.get("Content-Length".toLowerCase());
-
+        byte[] body = null;
         if (contentLength != null) {
             int length = Integer.parseInt(contentLength);
             if(length < 0)
@@ -125,8 +118,42 @@ public class HttpServer {
             }
         }
 
-        httpRequest.setBody(body);
-        httpRequest.setHeaders(headers);
+        return body;
+    }
+
+    private static Map<String, String> parseHeaders(BufferedReader bufferedReader) throws IOException {
+        Map<String, String> headers = new HashMap<>();
+
+        while (true) {
+            String inputLine = bufferedReader.readLine();
+            System.out.println(inputLine);
+            if (inputLine.trim().isEmpty()) {
+                break;
+            }
+            int index = inputLine.indexOf(":");
+            if (index != -1) {
+                String key = inputLine.substring(0, index);
+                String value = inputLine.substring(index+1);
+                headers.put(key.trim().toLowerCase(), value.trim());
+            }
+        }
+
+        return headers;
+    }
+
+    private static HttpRequest parseProtocolLine(String line) throws HttpException {
+        HttpRequest httpRequest = new HttpRequest();
+
+        String[] splites = line.split(" ");
+
+        if (splites.length != 3) {
+            throw new HttpException(400, "First Line Malformed");
+        }
+
+        httpRequest.setMethod(splites[0].trim().toUpperCase());
+        httpRequest.setAbsolutePath(splites[1].trim());
+        httpRequest.setVersion(splites[2].trim());
+
         return httpRequest;
     }
 }

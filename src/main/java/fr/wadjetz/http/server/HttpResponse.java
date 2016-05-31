@@ -83,4 +83,21 @@ public class HttpResponse {
     public Optional<File> getFile() {
         return file;
     }
+
+    public HttpResponse html(String html) {
+        headers.put("Content-Type", "text/html");
+        body = Optional.ofNullable(html);
+        return this;
+    }
+
+    @Override
+    public String toString() {
+        return "HttpResponse{" +
+                "status='" + status + '\'' +
+                ", statusText='" + statusText + '\'' +
+                ", body=" + body +
+                ", file=" + file +
+                ", headers=" + headers +
+                '}';
+    }
 }
