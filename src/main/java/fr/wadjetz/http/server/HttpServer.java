@@ -60,7 +60,7 @@ public class HttpServer {
                             printWriter.print(responseHeader);
                             printWriter.print(httpResponse.getBody().get() + "\r\n");
                         } else if (httpResponse.getFile().isPresent()) {
-                            String responseHeader = buildResponseHeader(httpRequest, httpResponse);
+                            String responseHeader = buildResponseHeader(httpRequest, httpResponse.withHeader("Content-Type", "text/plain"));
                             printWriter.print(responseHeader);
                             IOUtils.copyLarge(new FileReader(httpResponse.getFile().get()),printWriter);
                         } else {

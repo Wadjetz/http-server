@@ -20,9 +20,11 @@ class Main {
 
         //router.addRoute("/assets", new HttpStaticFileHandler("/tmp"));
 
+        HttpRouter httpRouterFiles = new HttpRouter().addRoute("/", new HttpStaticFileHandler("/tmp"));
+
         HttpVHost httpVHost = new HttpVHost()
                 .addVHost("site1.fr:" + port, router)
-                .addVHost("site2.fr:" + port, router);
+                .addVHost("site2.fr:" + port, httpRouterFiles);
 
 
         try {
