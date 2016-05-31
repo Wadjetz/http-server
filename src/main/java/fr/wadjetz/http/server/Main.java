@@ -14,15 +14,19 @@ class Main {
             System.out.println(request);
             //return response.withFile(new File("/tmp/test.txt"));
             //return response.withStatus(200).withBody(new String(request.getBody()));
-            return response.text(new String(request.getBody()));
+            return response.text("Hello");
         });
         //router.addRoute("/test", (request, response) -> response.text(new String(request.getBody())));
 
         //router.addRoute("/assets", new HttpStaticFileHandler("/tmp"));
 
+        HttpVHost httpVHost = new HttpVHost()
+                .addVHost("site1.fr:" + port, router)
+                .addVHost("site2.fr:" + port, router);
+
 
         try {
-            HttpServer.run(new InetSocketAddress("127.0.0.1", port), router);
+            HttpServer.run(new InetSocketAddress("127.0.0.1", port), httpVHost);
         } catch (IOException e) {
             e.printStackTrace();
         }

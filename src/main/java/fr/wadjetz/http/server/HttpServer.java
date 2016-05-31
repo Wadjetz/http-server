@@ -17,7 +17,15 @@ public class HttpServer {
         Optional<HttpHandler> apply(HttpRequest request);
     }
 
-    public static void run(final InetSocketAddress address, HttpRouter router) throws IOException {
+    public static void run(final InetSocketAddress address, HttpRouter httpRouter) throws IOException {
+        serverLoop(address, httpRouter::resolve);
+    }
+
+    public static void run(final InetSocketAddress address, HttpVHost httpVHost) throws IOException {
+        serverLoop(address, httpVHost::resolve);
+    }
+
+    private static void serverLoop(final InetSocketAddress address, Resolver resolver) throws IOException {
         ServerSocket serverSocket = new ServerSocket();
         serverSocket.bind(address);
 
@@ -37,7 +45,7 @@ public class HttpServer {
 
                     try {
                         httpRequest = parseRequest(bufferedReader);
-                        Optional<HttpHandler> httpHandlerOptional = router.resolve(httpRequest);
+                        Optional<HttpHandler> httpHandlerOptional = resolver.apply(httpRequest);
 
                         if (httpHandlerOptional.isPresent()) {
                             httpResponse = httpHandlerOptional.get().apply(httpRequest, new HttpResponse());

@@ -66,7 +66,7 @@ public class HttpRequest {
                 ", relativePath='" + relativePath + '\'' +
                 ", absolutePath='" + absolutePath + '\'' +
                 ", version='" + version + '\'' +
-                //", headers=" + headers +
+                ", headers=" + headers +
                 ", body=" + Arrays.toString(body) +
                 '}';
     }
