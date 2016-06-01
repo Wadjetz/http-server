@@ -1,7 +1,6 @@
-package fr.wadjetz.http;
+package fr.wadjetz.http.server;
 
 import fr.wadjetz.http.load.balancer.LoadBalancer;
-import fr.wadjetz.http.server.*;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -17,7 +16,7 @@ class Main {
             LoadBalancer loadBalancer = new LoadBalancer(httpConfig.getGroups());
             HttpVHost httpVHostFromConfig = new HttpVHost().loadConfig(httpConfig);
 
-            HttpRouter httpRouter = new HttpRouter().addRoute(new Route("ALL", Pattern.compile(".*"), loadBalancer));
+            HttpRouter httpRouter = new HttpRouter().addRoute(new Route("ALL", ".*", loadBalancer));
             HttpVHost httpVHost = new HttpVHost().addVHost("site2.fr:" + port, httpRouter);
 
             System.out.println("Start Server " + host + ":" + port);

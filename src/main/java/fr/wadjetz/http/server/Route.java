@@ -7,9 +7,9 @@ public class Route {
     private Pattern pattern;
     private HttpHandler httpHandler;
 
-    public Route(String method, Pattern pattern, HttpHandler httpHandler) {
+    public Route(String method, String pattern, HttpHandler httpHandler) {
         this.method = method;
-        this.pattern = pattern;
+        this.pattern = Pattern.compile(pattern);
         this.httpHandler = httpHandler;
     }
 

@@ -32,7 +32,7 @@ public class HttpVHost {
         List<VHost> vhosts = httpConfig.getVHosts();
 
         for (VHost vhost : vhosts) {
-            this.vhosts.put(vhost.domain + ":" + port, new HttpRouter().addRoute(new Route("GET", Pattern.compile("/.*"), new HttpStaticFileHandler(vhost.root))));
+            this.vhosts.put(vhost.domain + ":" + port, new HttpRouter().addRoute(new Route("GET", ".*", new HttpStaticFileHandler(vhost.root))));
         }
 
         return this;

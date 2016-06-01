@@ -1,6 +1,5 @@
 package fr.wadjetz.http.server;
 
-import fr.wadjetz.http.threadpool.HttpParser;
 import fr.wadjetz.http.threadpool.ThreadPool;
 import org.apache.commons.io.IOUtils;
 

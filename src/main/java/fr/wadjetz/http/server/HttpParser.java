@@ -1,8 +1,4 @@
-package fr.wadjetz.http.threadpool;
-
-import fr.wadjetz.http.server.HttpException;
-import fr.wadjetz.http.server.HttpRequest;
-import fr.wadjetz.http.server.HttpResponse;
+package fr.wadjetz.http.server;
 
 import java.io.BufferedReader;
 import java.io.IOException;
