@@ -18,7 +18,7 @@ public class HttpStaticFileHandler implements HttpHandler {
         System.out.println("HttpStaticFileHandler request = " + request);
 
         String requestPath = request.getAbsolutePath();
-        String path = (requestPath == "/") ? this.rootPath : this.rootPath + requestPath;
+        String path = buildPath(this.rootPath, requestPath);
 
         System.out.println("Path = " + path);
 
@@ -35,18 +35,14 @@ public class HttpStaticFileHandler implements HttpHandler {
         }
     }
 
+    private String buildPath(String root, String path) {
+        return (root + path).replaceAll("'/'*", "/").replaceAll("'..'*", "");
+    }
+
     private HttpResponse buildDirectory(HttpRequest request, HttpResponse response, File directory) {
 
-        String requestPath = request.getAbsolutePath();
-
-
         String f = Arrays.stream(directory.listFiles())
-                .map(file -> {
-                    String path = ((requestPath.endsWith("/")) ? requestPath : requestPath + "/") + file.getName();
-                    System.out.println(path);
-
-                    return "<div><a href=\"" + path + "\">" + file.getName() + "</a></div>";
-                })
+                .map(file -> "<div><a href=\"" + buildPath(request.getAbsolutePath(), "/" + file.getName()) + "\">" + file.getName() + "</a></div>")
                 .collect(Collectors.toList())
                 .stream()
                 .reduce("", String::concat);
