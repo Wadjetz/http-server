@@ -1,6 +1,8 @@
 package fr.wadjetz.http.server;
 
 import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
@@ -14,7 +16,14 @@ public class HttpStaticFileHandler implements HttpHandler {
 
     @Override
     public HttpResponse apply(HttpRequest request, HttpResponse response) {
-        String path = request.getAbsolutePath();
+        String path = null;
+        try {
+            path = URLDecoder.decode(request.getAbsolutePath(), "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("Path = " + path);
 
         File file = new File(path);
 
