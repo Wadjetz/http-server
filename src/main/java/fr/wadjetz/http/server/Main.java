@@ -11,7 +11,7 @@ class Main {
         HttpVHost httpVHost = new HttpVHost().loadConfig();
 
         try {
-            HttpServer.run(new InetSocketAddress("127.0.0.1", port), httpVHost);
+            new HttpServer().run(new InetSocketAddress("127.0.0.1", port), httpVHost);
         } catch (IOException e) {
             e.printStackTrace();
         }

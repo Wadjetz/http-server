@@ -1,5 +1,6 @@
 package fr.wadjetz.http.server;
 
+import fr.wadjetz.http.server.threadpool.ThreadPool;
 import org.apache.commons.io.IOUtils;
 
 import java.io.*;
@@ -13,28 +14,33 @@ import java.util.Optional;
 
 public class HttpServer {
 
+    private ThreadPool threadPool;
+
     @FunctionalInterface
     interface Resolver {
         Optional<HttpHandler> apply(HttpRequest request);
     }
 
-    public static void run(final InetSocketAddress address, HttpRouter httpRouter) throws IOException {
+    public HttpServer() {
+        this.threadPool = new ThreadPool(8);
+    }
+
+    public void run(final InetSocketAddress address, HttpRouter httpRouter) throws IOException {
         serverLoop(address, httpRouter::resolve);
     }
 
-    public static void run(final InetSocketAddress address, HttpVHost httpVHost) throws IOException {
+    public void run(final InetSocketAddress address, HttpVHost httpVHost) throws IOException {
         serverLoop(address, httpVHost::resolve);
     }
 
-    private static void serverLoop(final InetSocketAddress address, Resolver resolver) throws IOException {
+    private void serverLoop(final InetSocketAddress address, Resolver resolver) throws IOException {
         ServerSocket serverSocket = new ServerSocket();
         serverSocket.bind(address);
 
         while (true) {
             final Socket socket = serverSocket.accept();
 
-            new Thread(() -> {
-
+            this.threadPool.submit(() -> {
                 PrintWriter printWriter = null;
                 BufferedReader bufferedReader = null;
                 HttpRequest httpRequest = null;
@@ -83,7 +89,7 @@ public class HttpServer {
                 } finally {
                     if (printWriter != null) printWriter.close();
                 }
-            }).start();
+            });
 
             if (false) break;
         }
