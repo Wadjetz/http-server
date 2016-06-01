@@ -1,4 +1,8 @@
-package fr.wadjetz.http.server;
+package fr.wadjetz.http.load.balancer;
+
+import fr.wadjetz.http.server.HttpHandler;
+import fr.wadjetz.http.server.HttpRequest;
+import fr.wadjetz.http.server.HttpResponse;
 
 import java.util.List;
 

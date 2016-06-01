@@ -1,4 +1,4 @@
-package fr.wadjetz.http.server;
+package fr.wadjetz.http.load.balancer;
 
 import java.util.ArrayList;
 import java.util.List;

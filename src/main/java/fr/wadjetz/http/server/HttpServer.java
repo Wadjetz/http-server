@@ -1,7 +1,7 @@
 package fr.wadjetz.http.server;
 
-import fr.wadjetz.http.server.threadpool.HttpParser;
-import fr.wadjetz.http.server.threadpool.ThreadPool;
+import fr.wadjetz.http.threadpool.HttpParser;
+import fr.wadjetz.http.threadpool.ThreadPool;
 import org.apache.commons.io.IOUtils;
 
 import java.io.*;

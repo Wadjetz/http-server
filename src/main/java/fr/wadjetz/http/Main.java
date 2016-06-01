@@ -1,4 +1,7 @@
-package fr.wadjetz.http.server;
+package fr.wadjetz.http;
+
+import fr.wadjetz.http.load.balancer.LoadBalancer;
+import fr.wadjetz.http.server.*;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;

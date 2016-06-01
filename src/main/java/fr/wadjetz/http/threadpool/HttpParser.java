@@ -1,4 +1,4 @@
-package fr.wadjetz.http.server.threadpool;
+package fr.wadjetz.http.threadpool;
 
 import fr.wadjetz.http.server.HttpException;
 import fr.wadjetz.http.server.HttpRequest;

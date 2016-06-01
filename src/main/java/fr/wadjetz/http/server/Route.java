@@ -1,7 +1,5 @@
 package fr.wadjetz.http.server;
 
-import scala.util.matching.Regex;
-
 import java.util.regex.Pattern;
 
 public class Route {

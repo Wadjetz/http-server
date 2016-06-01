@@ -1,5 +1,7 @@
 package fr.wadjetz.http.server;
 
+import fr.wadjetz.http.load.balancer.Group;
+
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;

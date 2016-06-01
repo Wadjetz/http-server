@@ -1,4 +1,4 @@
-package fr.wadjetz.http.server.threadpool;
+package fr.wadjetz.http.threadpool;
 
 @FunctionalInterface
 public interface Job {
