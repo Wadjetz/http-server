@@ -4,10 +4,7 @@ import fr.wadjetz.http.server.threadpool.ThreadPool;
 import org.apache.commons.io.IOUtils;
 
 import java.io.*;
-import java.net.InetSocketAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.URLDecoder;
+import java.net.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -67,7 +64,7 @@ public class HttpServer {
                             printWriter.print(responseHeader);
                             printWriter.print(httpResponse.getBody().get() + "\r\n");
                         } else if (httpResponse.getFile().isPresent()) {
-                            String responseHeader = buildResponseHeader(httpRequest, httpResponse.withHeader("Content-Type", "text/plain"));
+                            String responseHeader = buildResponseHeader(httpRequest, httpResponse.withHeader("Content-Type", URLConnection.guessContentTypeFromName(httpResponse.getFile().get().getName())));
                             printWriter.print(responseHeader);
                             IOUtils.copyLarge(new FileReader(httpResponse.getFile().get()),printWriter);
                         } else {
