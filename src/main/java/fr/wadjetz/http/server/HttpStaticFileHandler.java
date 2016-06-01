@@ -36,7 +36,7 @@ public class HttpStaticFileHandler implements HttpHandler {
     }
 
     private String buildPath(String root, String path) {
-        return (root + path).replaceAll("'/'*", "/").replaceAll("'..'*", "");
+        return (root + path).replaceAll("/+", "/").replaceAll("'..'*", "");
     }
 
     private HttpResponse buildDirectory(HttpRequest request, HttpResponse response, File directory) {
