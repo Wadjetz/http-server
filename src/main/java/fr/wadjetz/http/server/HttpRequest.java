@@ -10,6 +10,7 @@ public class HttpRequest {
     private String version;
     private Map<String, String> headers;
     private byte[] body;
+    private int port;
 
     public void setMethod(String method) {
         this.method = method;
@@ -57,6 +58,14 @@ public class HttpRequest {
 
     public String getMethod() {
         return method;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
     }
 
     @Override

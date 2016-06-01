@@ -1,8 +1,8 @@
 package fr.wadjetz.http.server;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class HttpConfig {
     private String path;
@@ -12,31 +12,12 @@ public class HttpConfig {
         this.path = path;
     }
 
-    public HttpConfig load() {
-        ClassLoader classLoader = getClass().getClassLoader();
-        File file = new File(classLoader.getResource(path).getFile());
-
-        try {
-            Scanner scanner = new Scanner(file);
-
-            while (scanner.hasNextLine()) {
-                String line = scanner.nextLine();
-                if (!line.trim().isEmpty()) {
-                    int intex = line.indexOf(":");
-
-                    String key = line.substring(0, intex).trim();
-                    String value = line.substring(intex + 1).trim();
-
-                    config.put(key, value);
-                }
-            }
-
-            scanner.close();
-
-        } catch (IOException e) {
-            e.printStackTrace();
+    public HttpConfig load() throws IOException {
+        Properties properties = new Properties();
+        properties.load(getClass().getClassLoader().getResourceAsStream("conf.properties"));
+        for (String key : properties.stringPropertyNames()) {
+            config.put(key, properties.getProperty(key));
         }
-
         return this;
     }
 
@@ -64,5 +45,18 @@ public class HttpConfig {
         }
 
         return vhosts;
+    }
+
+    public List<Group> getGroups() {
+        String[] groups = config.get("groups").split(",");
+        return Arrays.stream(groups).map(s -> s.trim()).map(group -> {
+            String name = config.get(group + ".name");
+            List<String> members = Arrays.stream(config.get(group + ".members").split(","))
+                    .map(s -> s.trim())
+                    .collect(Collectors.toList());
+            String lbMethod = config.get(group + ".lb.method");
+            String domain = config.get(group + ".domain");
+            return new Group(name, members, lbMethod, domain);
+        }).collect(Collectors.toList());
     }
 }

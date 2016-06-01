@@ -38,4 +38,13 @@ public class Route {
     public void setPattern(Pattern pattern) {
         this.pattern = pattern;
     }
+
+    @Override
+    public String toString() {
+        return "Route{" +
+                "method='" + method + '\'' +
+                ", pattern=" + pattern +
+                ", httpHandler=" + httpHandler +
+                '}';
+    }
 }
