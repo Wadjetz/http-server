@@ -37,8 +37,16 @@ public class HttpStaticFileHandler implements HttpHandler {
 
     private HttpResponse buildDirectory(HttpRequest request, HttpResponse response, File directory) {
 
+        String requestPath = request.getAbsolutePath();
+
+
         String f = Arrays.stream(directory.listFiles())
-                .map(file -> "<div><a href=\"/" + file.getName() +"\">" + file.getName() + "</a></div>")
+                .map(file -> {
+                    String path = ((requestPath.endsWith("/")) ? requestPath : requestPath + "/") + file.getName();
+                    System.out.println(path);
+
+                    return "<div><a href=\"" + path + "\">" + file.getName() + "</a></div>";
+                })
                 .collect(Collectors.toList())
                 .stream()
                 .reduce("", String::concat);
