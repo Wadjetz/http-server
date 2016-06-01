@@ -6,6 +6,7 @@ import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -134,14 +135,14 @@ public class HttpServer {
 
         while (true) {
             String inputLine = bufferedReader.readLine();
-            System.out.println(inputLine);
+            //System.out.println(inputLine);
             if (inputLine.trim().isEmpty()) {
                 break;
             }
             int index = inputLine.indexOf(":");
             if (index != -1) {
-                String key = inputLine.substring(0, index);
-                String value = inputLine.substring(index+1);
+                String key = URLDecoder.decode(inputLine.substring(0, index), "UTF-8");
+                String value = URLDecoder.decode(inputLine.substring(index+1), "UTF-8");
                 headers.put(key.trim().toLowerCase(), value.trim());
             }
         }
@@ -149,7 +150,7 @@ public class HttpServer {
         return headers;
     }
 
-    private static HttpRequest parseProtocolLine(String line) throws HttpException {
+    private static HttpRequest parseProtocolLine(String line) throws HttpException, UnsupportedEncodingException {
         HttpRequest httpRequest = new HttpRequest();
 
         String[] splites = line.split(" ");
@@ -158,9 +159,13 @@ public class HttpServer {
             throw new HttpException(400, "First Line Malformed");
         }
 
-        httpRequest.setMethod(splites[0].trim().toUpperCase());
-        httpRequest.setAbsolutePath(splites[1].trim());
-        httpRequest.setVersion(splites[2].trim());
+        String method = URLDecoder.decode(splites[0].trim().toUpperCase(), "UTF-8");
+        String absolutePath = URLDecoder.decode(splites[1].trim(), "UTF-8");
+        String version = URLDecoder.decode(splites[2].trim(), "UTF-8");
+
+        httpRequest.setMethod(method);
+        httpRequest.setAbsolutePath(absolutePath);
+        httpRequest.setVersion(version);
 
         return httpRequest;
     }

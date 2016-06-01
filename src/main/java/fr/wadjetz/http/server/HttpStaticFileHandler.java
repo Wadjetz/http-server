@@ -1,8 +1,6 @@
 package fr.wadjetz.http.server;
 
 import java.io.File;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
@@ -16,12 +14,11 @@ public class HttpStaticFileHandler implements HttpHandler {
 
     @Override
     public HttpResponse apply(HttpRequest request, HttpResponse response) {
-        String path = null;
-        try {
-            path = URLDecoder.decode(request.getAbsolutePath(), "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
+
+        System.out.println("HttpStaticFileHandler request = " + request);
+
+        String requestPath = request.getAbsolutePath();
+        String path = (requestPath == "/") ? this.rootPath : this.rootPath + requestPath;
 
         System.out.println("Path = " + path);
 
@@ -40,9 +37,11 @@ public class HttpStaticFileHandler implements HttpHandler {
 
     private HttpResponse buildDirectory(HttpRequest request, HttpResponse response, File directory) {
 
-        String f = Arrays.stream(directory.listFiles()).map(file -> {
-            return "<div><a href=\"/" + file.getName() +"\">" + file.getName() + "</a></div>";
-        }).collect(Collectors.toList()).stream().reduce("", String::concat);
+        String f = Arrays.stream(directory.listFiles())
+                .map(file -> "<div><a href=\"/" + file.getName() +"\">" + file.getName() + "</a></div>")
+                .collect(Collectors.toList())
+                .stream()
+                .reduce("", String::concat);
 
         String html = "<!doctype html>" +
                 "<html>" +
