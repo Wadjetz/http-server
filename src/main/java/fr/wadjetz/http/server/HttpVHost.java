@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 public class HttpVHost {
 
@@ -17,8 +18,6 @@ public class HttpVHost {
     public Optional<HttpHandler> resolve(HttpRequest request) {
         String host = request.getHeaders().get("host");
 
-        System.out.println(host);
-
         if (host != null) {
             HttpRouter httpRouter = vhosts.get(host);
 
@@ -30,8 +29,7 @@ public class HttpVHost {
         }
     }
 
-    public void loadConfig() {
-        HttpStaticFileHandler httpStaticFileHandler = new HttpStaticFileHandler("/tmp");
+    public HttpVHost loadConfig() {
         HttpConfig httpConfig = new HttpConfig("config").load();
 
         int port = Integer.parseInt(httpConfig.getString("port").orElse("8888"));
@@ -39,8 +37,10 @@ public class HttpVHost {
         List<VHost> vhosts = httpConfig.getVHosts();
 
         for (VHost vhost : vhosts) {
-
+            this.vhosts.put(vhost.domain + ":" + port, new HttpRouter().addRoute(new Route("GET", Pattern.compile("/.*"), new HttpStaticFileHandler(vhost.root))));
         }
+
+        return this;
     }
 
     @Override
