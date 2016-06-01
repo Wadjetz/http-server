@@ -6,16 +6,16 @@ import fr.wadjetz.http.server.HttpResponse;
 
 import java.util.List;
 
-public class LoadBalancer implements HttpHandler {
+public class LoadBalancing implements HttpHandler {
 
     private List<Group> groups;
 
-    public LoadBalancer(List<Group> groups) {
+    public LoadBalancing(List<Group> groups) {
         this.groups = groups;
     }
 
     @Override
     public HttpResponse apply(HttpRequest request, HttpResponse response) {
-        return response.withStatus(200).withBody("LoadBalancer");
+        return response.withStatus(200).withBody("LoadBalancing");
     }
 }

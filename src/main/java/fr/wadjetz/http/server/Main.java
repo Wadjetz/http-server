@@ -1,10 +1,9 @@
 package fr.wadjetz.http.server;
 
-import fr.wadjetz.http.load.balancer.LoadBalancer;
+import fr.wadjetz.http.load.balancer.LoadBalancing;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.regex.Pattern;
 
 class Main {
     public static void main(String[] args) {
@@ -13,10 +12,10 @@ class Main {
             int port = Integer.parseInt(httpConfig.getString("port").orElse("8888"));
             String host = httpConfig.getString("host").orElse("0.0.0.0");
 
-            LoadBalancer loadBalancer = new LoadBalancer(httpConfig.getGroups());
+            LoadBalancing loadBalancing = new LoadBalancing(httpConfig.getGroups());
             HttpVHost httpVHostFromConfig = new HttpVHost().loadConfig(httpConfig);
 
-            HttpRouter httpRouter = new HttpRouter().addRoute(new Route("ALL", ".*", loadBalancer));
+            HttpRouter httpRouter = new HttpRouter().addRoute(new Route("ALL", ".*", loadBalancing));
             HttpVHost httpVHost = new HttpVHost().addVHost("site2.fr:" + port, httpRouter);
 
             System.out.println("Start Server " + host + ":" + port);
